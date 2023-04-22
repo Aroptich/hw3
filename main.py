@@ -3,12 +3,7 @@ import pymysql
 from config import host, port, user, password, schema_name
 
 
-
-
-
-
 class Database:
-
 
     @staticmethod
     def connect(func):
@@ -34,8 +29,27 @@ class Database:
 
         return wrapper
 
-
+    @connect
+    def create_table(self, table_name: str, **dict_data: dict) -> str:
+        try:
+            self.table_name = table_name
+            self.columns_name = [keys for keys in dict_data]
+            self.type_data = [dict_data[keys] for keys in dict_data]
+            self.res = ','.join([' '.join(i) for i in zip(self.columns_name, self.type_data)])
+            self.create_table_query = f"CREATE TABLE IF NOT EXISTS {self.table_name} ({self.res});"
+            return self.create_table_query
+        except Exception as err:
+            print(err)
 
 
 if __name__ == '__main__':
-   db= Database()
+    db = Database()
+    create_table = db.create_table('staff',
+                                   id='int auto_increment primary key',
+                                   firstname='varchar(40)',
+                                   lastname='varchar(40)',
+                                   post='varchar(40)',
+                                   seniority='int',
+                                   salary='int',
+                                   age='int')
+
