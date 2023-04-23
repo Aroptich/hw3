@@ -22,6 +22,7 @@ employee10 = Eployee('"Максим"', '"Максимов"', '"Рабочий"',
 employee11 = Eployee('"Юрий"', '"Галкин"', '"Рабочий"', 3, 12000, 24)
 employee12 = Eployee('"Людмила"', '"Маркина"', '"Уборщик"', 10, 10000, 49)
 
+
 employees =[employee1,
             employee2,
             employee3,
@@ -34,3 +35,11 @@ employees =[employee1,
             employee10,
             employee11,
             employee12]
+# workers = []
+# for eml in employees:
+#     # print(eml.__dict__)
+#     workers.append([eml.__dict__[i] for i in eml.__dict__])
+# print(workers)
+# for i in workers:
+#     print(','.join(map(str,i)))
+# # print(employees)

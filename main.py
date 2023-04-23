@@ -1,5 +1,6 @@
 import pymysql
 from prettytable import PrettyTable
+from datetime import datetime
 
 from config import host, port, user, password, schema_name
 from employee import employees
@@ -33,7 +34,6 @@ class Database:
 
     @staticmethod
     def reading_data(func):
-
         def wrapper(self, *args, **kwargs):
             try:
                 connection = pymysql.connect(
@@ -46,7 +46,7 @@ class Database:
                 )
                 print("successfully connected....")
                 with connection.cursor() as cursor:
-                    cursor.execute(func(self, *args, **kwargs))
+                    res = cursor.execute(func(self, *args, **kwargs))
                     x = PrettyTable()
                     rows = cursor.fetchall()
                     x.field_names = [row for row in rows[0]]
@@ -54,6 +54,7 @@ class Database:
                         x.add_row([row[i] for i in row])
                     print(x)
                     connection.commit()
+                    return res
             except Exception as err:
                 print("Connection refused...")
                 print(err)
@@ -62,19 +63,37 @@ class Database:
 
         return wrapper
 
+    @staticmethod
+    def logger(func):
+        def wrapper(*args, **kwargs):
+            try:
+                with open('log.txt', 'a', encoding='utf-8') as file:
+                    query = func(*args, **kwargs)
+                    file.writelines(f"{datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+                    file.writelines(f"{'=' * 35}\n")
+                    file.writelines(f'{query}\n')
+                    file.writelines(f"{'=' * 35}\n")
+                    return query
+            except Exception as err:
+                print(err)
+
+        return wrapper
+
     @connect
+    @logger
     def create_table(self, table_name: str, **dict_data: dict) -> str:
         try:
             self.table_name = table_name
             self.columns_name = [keys for keys in dict_data]
             self.type_data = [dict_data[keys] for keys in dict_data]
-            self.res = ','.join([' '.join(i) for i in zip(self.columns_name, self.type_data)])
-            self.create_table_query = f"CREATE TABLE IF NOT EXISTS {self.table_name} ({self.res});"
+            self.res = ',\n'.join([' '.join(i) for i in zip(self.columns_name, self.type_data)])
+            self.create_table_query = f"CREATE TABLE IF NOT EXISTS {self.table_name} \n({self.res});"
             return self.create_table_query
         except Exception as err:
             print(err)
 
     @connect
+    @logger
     def insert_data(self, table_name: str, data: dict) -> str:
         try:
             self.table_name = table_name
@@ -84,28 +103,31 @@ class Database:
             return self.insert_data_query
         except Exception as err:
             print(err)
+
     @reading_data
+    @logger
     def sort_columns(self, table_name: str, column_name: str, sort=True, limit=None) -> str:
         try:
             self.table_name = table_name
             self.columns_name = column_name
             if not sort and limit is None or limit == 0:
-                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name} DESC"
+                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name} DESC;"
                 return self.sort_columns_query
             elif not sort and limit:
-                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name} DESC \nLIMIT {limit}"
+                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name} DESC \nLIMIT {limit};"
                 return self.sort_columns_query
             elif sort and limit > 0:
-                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name} \nLIMIT {limit}"
+                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name} \nLIMIT {limit};"
                 return self.sort_columns_query
             else:
-                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name}"
+                self.sort_columns_query = f"SELECT * \nFROM {self.table_name} \nORDER BY {self.columns_name};"
                 return self.sort_columns_query
 
         except Exception as err:
             print(err)
 
-    @reading_data
+    @connect
+    @logger
     def select_data(self, table_name: str, **kwargs):
         try:
             self.name_table = table_name
@@ -128,4 +150,5 @@ if __name__ == '__main__':
     for employee in employees:
         insert_note = db.insert_data('staff', employee.__dict__)
 
-    db.sort_columns('staff', 'salary', sort=True, limit=25)
+    # db.sort_columns('staff', 'salary', sort=True, limit=25)
+    db.select_data('staff')
