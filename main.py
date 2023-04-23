@@ -1,6 +1,7 @@
 import pymysql
 
 from config import host, port, user, password, schema_name
+from employee import employees
 
 
 class Database:
@@ -41,6 +42,17 @@ class Database:
         except Exception as err:
             print(err)
 
+    @connect
+    def insert_data(self, table_name: str, data: dict) -> str:
+        try:
+            self.table_name = table_name
+            self.columns_name = ','.join([keys for keys in data])
+            self.values = ','.join([str(data[keys]) for keys in data])
+            self.insert_data_query = f"INSERT INTO {self.table_name} ({self.columns_name}) VALUES ({self.values});"
+            return self.insert_data_query
+        except Exception as err:
+            print(err)
+
 
 if __name__ == '__main__':
     db = Database()
@@ -52,4 +64,6 @@ if __name__ == '__main__':
                                    seniority='int',
                                    salary='int',
                                    age='int')
+    for employee in employees:
+            isert_note = db.insert_data('staff',employee.__dict__)
 
