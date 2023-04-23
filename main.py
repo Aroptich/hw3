@@ -128,7 +128,7 @@ class Database:
 
     @connect
     @logger
-    def select_data(self, table_name: str, **kwargs):
+    def select_data(self, table_name: str, **kwargs)-> str:
         try:
             self.name_table = table_name
             self.select_all_rows = f"SELECT * FROM {self.name_table}"
@@ -137,7 +137,7 @@ class Database:
             print(err)
     @reading_data
     @logger
-    def total_salary_by_post(self, table_name: str, post: str):
+    def total_salary_by_post(self, table_name: str, post: str)-> str:
         try:
             self.table_name = table_name
             self.post = post
@@ -149,18 +149,31 @@ class Database:
             print(err)
     @reading_data
     @logger
-    def count_posts(self, table_name: str, column_name: str, post: str):
+    def count_posts(self, table_name: str, column_name: str, post: str) -> str:
         try:
             self.table_name = table_name
             self.post = post
             self.columns_name = column_name
             self.count_posts_query = f"SELECT COUNT({self.columns_name}) AS 'Найдено совпадений' " \
                                      f"\nFROM {self.table_name} " \
-                                     f"\nWHERE post={self.post} AND age between 29 and 49"
+                                     f"\nWHERE post={self.post} AND age between 29 and 49;"
             return self.count_posts_query
         except Exception as err:
             print(err)
+    @reading_data
+    @logger
+    def count_of_posts(self, table_name: str, column_name: str, post: str) -> str:
+        try:
+            self.table_name = table_name
+            self.post = post
+            self.columns_name = column_name
+            self.count_of_posts_query = f"SELECT COUNT({self.columns_name}) AS 'Найдено совпадений {self.post}' " \
+                                     f"\nFROM {self.table_name} " \
+                                     f"\nWHERE post={self.post};"
 
+            return self.count_of_posts_query
+        except Exception as err:
+            print(err)
 
 
 if __name__ == '__main__':
@@ -183,4 +196,8 @@ if __name__ == '__main__':
     # db.total_salary_by_post('staff', '"Инженер"')
     # db.total_salary_by_post('staff', '"Уборщик"')
 
-    db.count_posts('staff', 'post', '"Рабочий"')
+    # db.count_posts('staff', 'post', '"Рабочий"')
+    db.count_of_posts('staff', 'post', '"Рабочий"')
+    db.count_of_posts('staff', 'post', '"Начальник"')
+    db.count_of_posts('staff', 'post', '"Инженер"')
+    db.count_of_posts('staff', 'post', '"Уборщик"')
