@@ -135,6 +135,32 @@ class Database:
             return self.select_all_rows
         except Exception as err:
             print(err)
+    @reading_data
+    @logger
+    def total_salary_by_post(self, table_name: str, post: str):
+        try:
+            self.table_name = table_name
+            self.post = post
+            self.total_salary_by_post_query = f"SELECT SUM(salary) AS `Суммарная зарплата на должности {self.post}` " \
+                                              f"FROM {self.table_name} " \
+                                              f"WHERE post={self.post}"
+            return self.total_salary_by_post_query
+        except Exception as err:
+            print(err)
+    @reading_data
+    @logger
+    def count_posts(self, table_name: str, column_name: str, post: str):
+        try:
+            self.table_name = table_name
+            self.post = post
+            self.columns_name = column_name
+            self.count_posts_query = f"SELECT COUNT({self.columns_name}) AS 'Найдено совпадений' " \
+                                     f"\nFROM {self.table_name} " \
+                                     f"\nWHERE post={self.post} AND age between 29 and 49"
+            return self.count_posts_query
+        except Exception as err:
+            print(err)
+
 
 
 if __name__ == '__main__':
@@ -147,8 +173,14 @@ if __name__ == '__main__':
                                    seniority='int',
                                    salary='int',
                                    age='int')
-    for employee in employees:
-        insert_note = db.insert_data('staff', employee.__dict__)
+    # for employee in employees:
+    #     insert_note = db.insert_data('staff', employee.__dict__)
 
     # db.sort_columns('staff', 'salary', sort=True, limit=25)
-    db.select_data('staff')
+    # db.select_data('staff')
+    # db.total_salary_by_post('staff', '"Рабочий"')
+    # db.total_salary_by_post('staff', '"Начальник"')
+    # db.total_salary_by_post('staff', '"Инженер"')
+    # db.total_salary_by_post('staff', '"Уборщик"')
+
+    db.count_posts('staff', 'post', '"Рабочий"')
